@@ -4,11 +4,11 @@ import os
 from io import BytesIO 
 
 
-st.set_page_config(page_title == "Data Sweeper", layout = 'wide')
+st.set_page_config(page_title = "Data Sweeper", layout = 'wide')
 
 # CSS 
 
-st.mardown(
+st.markdown(
     """
     <style>
     .stApp{
@@ -25,14 +25,14 @@ st.title("🚀Data Sweeper")
 st.write ("🌟Transform your file between CSV to Excel formats with built-in data and Visulization!")
 
 # file uploader
-uploaded_files = st.file_uploader("Upload Files to CSV or Excel : ", type= ["cvs","xlsx"], accept_multiple_files= True)
+uploaded_files = st.file_uploader("Upload Files to CSV or Excel : ", type= ["csv","xlsx"], accept_multiple_files= True)
 if uploaded_files:
     for file in uploaded_files:
         file_ext = os.path.splitext(file.name)[-1].lower()
 
-        if file_ext == ".cvs":
+        if file_ext == ".csv":
             df =pd.read_csv(file)
-        elif file_ext == "xlsx":
+        elif file_ext == ".xlsx":
             df =pd.read_excel(file)
         else:
             st.error(f"unsupported file type:   {file_ext}")
@@ -45,7 +45,7 @@ if uploaded_files:
         # data chleaning options 
         st.subheader("Data Cleaning Options:")
 
-        if st.checkbox("Clean data for {file.name}"):
+        if st.checkbox(f"Clean data for {file.name}"):
             coll, col2 = st.columns(2)
 
             with coll:
@@ -55,12 +55,12 @@ if uploaded_files:
 
                     with col2:
                         if st.button (f"fill missing values for {file.name}"):
-                            numeric_cols =df.select_dtypes(includes=['number']).colums
+                            numeric_cols =df.select_dtypes(include=['number'])
                             df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].mean())
                             st.write("✔️missing value Have been filled")
             st.subheader("🎯 Select Coulumn to convert")
-            colums = st.multiselect(f"choose column for {file.name}",df.columns, default=colums)
-            df = df[colums]
+            columns = st.multiselect(f"choose columnn for {file.name}",df.columns, default=df.columns)
+            df = df[columns]
 
 
             # data visualization 
@@ -74,27 +74,27 @@ if uploaded_files:
     st.subheader("Conversion Options")
     conversion_type = st.radio(f"convert {file.name} to:" , ["CSV" ,"Excel"], key = file.name )
 
-    if st.button("Convert{file.name}"):
+    if st.button(f"Convert    {file.name}"):
         buffer = BytesIO()
         if conversion_type == "CSV" :
-            df.to.csv(buffer ,  index = False)
+            df.to_csv(buffer ,  index = False)
             file_name = file.name.replace(file_ext, "csv")
             mime_type = "text/csv"
 
         elif conversion_type == "Excel":
-            df.to.do_excel(buffer , index = False)
+            df.to_excel(buffer , index = False)
             file_name = file.name.replace(file_ext, "xlsx")
             mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         buffer.seek(0)
 
         st.download_button (
             label= f"Download {file.name} as {conversion_type}" ,
-            date = buffer ,
+            data = buffer ,
             file_name= file_name ,
             mime = mime_type
         )
-        
-    st.successc("🎉 All files processed successfully! ✨🎉")  
+
+    st.success("🎉 All files have been processed successfully! ✨🎉")  
 
 
 
